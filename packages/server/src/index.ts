@@ -12,19 +12,26 @@ const handleApplication = (
 ) => {
   const application = new Hono();
 
-  application.get(`/${name}`, (context) => {
+  application.get(`/:lang/${name}`, (context) => {
     return context.redirect(`/${name}/`);
   });
 
   application.on(
     "GET",
-    [`/${name}/`, `/${name}/:path{.+$}`],
+    [`/:lang/${name}/`, `/:lang/${name}/:path{.+$}`],
     async (context) => {
-      if (context.req.path.endsWith("/") && context.req.path !== `/${name}/`) {
+      if (
+        context.req.path.endsWith("/") &&
+        context.req.path !== `/${context.req.param("lang")}/${name}/`
+      ) {
         return context.redirect(context.req.url.slice(0, -1), 301);
       }
 
-      return await fetch(`${location}/${context.req.param("path") || ""}`);
+      return await fetch(
+        `${location}/${context.req.param("lang")}/${
+          context.req.param("path") || ""
+        }`
+      );
     }
   );
 
